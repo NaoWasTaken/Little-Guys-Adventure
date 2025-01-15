@@ -5,11 +5,9 @@ import os
 # Path Handling
 
 if getattr(sys, 'frozen', False):
-    # Running as a bundled executable, look for the DLL in the same directory
     dll_path = os.path.join(sys._MEIPASS, 'SDL2.dll')
     os.environ['PATH'] = os.path.dirname(dll_path) + os.pathsep + os.environ['PATH']
 else:
-    # Running as a script, ensure DLL is in the working directory
     dll_path = 'SDL2.dll'
     os.environ['PATH'] = os.path.dirname(dll_path) + os.pathsep + os.environ['PATH']
 
@@ -41,13 +39,10 @@ pygame.display.set_caption("Little Guy's Adventure")
 # Determine the correct path for assets
 def get_asset_path(filename):
     if getattr(sys, 'frozen', False):
-        # If running as a bundled executable, get the path from sys._MEIPASS
         return os.path.join(sys._MEIPASS, 'assets', filename)
     else:
-        # If running as a Python script, use the script's directory
         return os.path.join(os.path.dirname(__file__), 'assets', filename)
 
-# Load assets using the function
 background = pygame.image.load(get_asset_path("Sky.png"))
 player_image = pygame.image.load(get_asset_path("Little-Guy.png"))
 player_image = pygame.transform.scale(player_image, (14, 32))
@@ -336,7 +331,7 @@ def game_loop():
                 break
 
         
-        # Check collision with the ground (only for the original scene, not the transition)
+        # Check collision with the ground
         if background != earlyspacetransition_background and background != skytransition_background and background != midspacetransition_background and background != latespacetransition_background:
             if player_rect.colliderect(ground_rect):
                 velocity_y = 0
@@ -458,7 +453,6 @@ def game_loop():
         # Draw player
         screen.blit(player_image, (player_pos[0], player_pos[1]))
 
-        # Only draw the ground if not in the skytransition or second transition scene
         if background == littleguywon:
             screen.blit(littleguywon, (0, 0))
         if background != earlyspacetransition_background and background != skytransition_background and background != midspacetransition_background and background != latespacetransition_background and background != littleguywon:
@@ -481,8 +475,6 @@ def game_loop():
         clock.tick(60)
 
 
-
-# Inside game_end, call reset_game before the retry
 def game_end():
     font = pygame.font.Font(None, 74)
     header_font = pygame.font.Font(None, 80)
@@ -501,28 +493,22 @@ def game_end():
     quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 100, 200, 70)
 
     while True:
-        screen.fill(DARKER_BLUE)  # Fill the screen with the background color
+        screen.fill(DARKER_BLUE)
         
         if background == littleguywon:
-            # Draw the littleguywon background (assuming you already have it as a surface or image)
             screen.blit(littleguywon, (0, 0))
 
-            # Create the "Little Guy Won!" text with shadow and outline
             won_text = header_font.render("Little Guy Won!", True, WHITE)
             shadow_won_text = header_font.render("Little Guy Won!", True, BLACK)
             
-            # Position the text at the center of the screen
             won_text_rect = won_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
             shadow_won_text_rect = shadow_won_text.get_rect(center=(SCREEN_WIDTH // 2 + 2, SCREEN_HEIGHT // 2 - 98))  # Shadow offset
 
-            # Draw the shadow first (behind the text)
             screen.blit(shadow_won_text, shadow_won_text_rect)
             
-            # Draw the actual "Little Guy Won!" text
             screen.blit(won_text, won_text_rect)
 
         else:
-            # Draw header shadow and text with outline for "Game Over"
             shadow_offset = 5
             screen.blit(shadow_text, (SCREEN_WIDTH // 2 - shadow_text.get_width() // 2 + shadow_offset, 45 + shadow_offset))
             outline_offset = 2
@@ -567,8 +553,8 @@ def game_end():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if retry_button.collidepoint(mouse_pos):
-                        reset_game()  # Reset game state here
-                        game_loop()   # Restart the game
+                        reset_game()
+                        game_loop()
                     if menu_button.collidepoint(mouse_pos):
                         main_menu()
                     if quit_button.collidepoint(mouse_pos):
@@ -576,5 +562,4 @@ def game_end():
                         sys.exit()
 
 
-# Start the game by showing the main menu
 main_menu()
